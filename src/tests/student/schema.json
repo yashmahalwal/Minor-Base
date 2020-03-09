@@ -1,0 +1,23 @@
+{
+    "id": {
+        "type": "random.uuid"
+    },
+    "addresses": {
+        "type": "address.zipCode",
+        "plural": true,
+        "nullable": true
+    },
+    "age": {
+        "type": [
+            {
+                "field": "random.number",
+                "args": [{ "min": 0, "max": 100, "precision": 1 }]
+            }
+        ]
+    },
+    "classes": {
+        "name": {
+            "type": ["random.word", { "field": "lorem.lines", "args": [1] }]
+        }
+    }
+}

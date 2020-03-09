@@ -1,0 +1,19 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "alwaysStrict": true,
+        "declaration": true,
+        "declarationMap": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "outDir": "lib",
+        "rootDir": "src",
+        "module": "commonjs",
+        "target": "ES3",
+        "resolveJsonModule": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
+}
