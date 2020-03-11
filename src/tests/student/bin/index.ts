@@ -9,7 +9,10 @@ import {
     isValidEndpointsJSON,
     Case
 } from "../../generic/types";
-import { resourceToEndpoint } from "../../generic/utility/endpoints";
+import {
+    resourceToEndpoint,
+    resourceFromCase
+} from "../../generic/utility/endpoints";
 if (!isValidResourceJSON(resourceJSON))
     throw new Error(
         `Invalid resource schema at ${path.resolve(__dirname, "..")}`
@@ -35,7 +38,19 @@ endpoints.forEach(endpoint => {
             console.log(method.method);
             method.cases.forEach(c => {
                 console.log(c.key);
-                console.log(resourceToEndpoint(gen, url.url, c as Case));
+                const obj = resourceToEndpoint(gen, url.url, c as Case);
+                console.log(obj);
+                console.log("Backward mapping from endpoint to resource");
+                console.log(
+                    resourceFromCase(
+                        url.url,
+                        obj.url,
+                        (c as Case).request.body,
+                        (c as Case).response.body,
+                        obj.reqBody,
+                        obj.resBody
+                    )
+                );
                 console.log("\n");
             });
             console.log("\n");

@@ -157,10 +157,6 @@
                                     "key": "POSITIVE",
                                     "request": {
                                         "body": {
-                                            "id": {
-                                                "field": "{resource.id}",
-                                                "optional": true
-                                            },
                                             "name": {
                                                 "field": "{resource.name}",
                                                 "optional": true
