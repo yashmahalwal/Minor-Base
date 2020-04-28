@@ -18,7 +18,7 @@
                 "args": [{ "min": 0, "max": 100, "precision": 1 }]
             }
         },
-        "branches": {
+        "branch": {
             "title": { "type": "random.word" }
         },
         "classes": {
@@ -40,7 +40,7 @@
             "endpoint": "/Student",
             "urls": [
                 {
-                    "url": "/Student/{resource.id}",
+                    "url": "/{resource.id}",
                     "methods": [
                         {
                             "method": "GET",
@@ -50,7 +50,7 @@
                                     "request": { "body": null },
                                     "response": {
                                         "status": 200,
-                                        "body": "{resource}"
+                                        "body": { "student": "{resource}" }
                                     }
                                 },
                                 {
@@ -58,14 +58,6 @@
                                     "request": { "body": null },
                                     "response": {
                                         "status": 404,
-                                        "body": null
-                                    }
-                                },
-                                {
-                                    "key": "DESTRUCTIVE",
-                                    "request": { "body": null },
-                                    "response": {
-                                        "status": 400,
                                         "body": null
                                     }
                                 }
@@ -79,7 +71,7 @@
                                     "request": { "body": null },
                                     "response": {
                                         "status": 200,
-                                        "body": "{resource}"
+                                        "body": { "student": "{resource}" }
                                     }
                                 },
                                 {
@@ -87,14 +79,6 @@
                                     "request": { "body": null },
                                     "response": {
                                         "status": 404,
-                                        "body": null
-                                    }
-                                },
-                                {
-                                    "key": "DESTRUCTIVE",
-                                    "request": { "body": null },
-                                    "response": {
-                                        "status": 400,
                                         "body": null
                                     }
                                 }
@@ -105,16 +89,29 @@
                             "cases": [
                                 {
                                     "key": "POSITIVE",
-                                    "request": { "body": "{resource}" },
+                                    "request": {
+                                        "body": { "student": "{resource}" }
+                                    },
                                     "response": {
                                         "status": 201,
-                                        "body": "{resource}"
+                                        "body": { "student": "{resource}" }
                                     }
                                 },
-
+                                {
+                                    "key": "NEGATIVE",
+                                    "request": {
+                                        "body": { "student": "{resource}" }
+                                    },
+                                    "response": {
+                                        "status": 409,
+                                        "body": null
+                                    }
+                                },
                                 {
                                     "key": "DESTRUCTIVE",
-                                    "request": { "body": "{resource}" },
+                                    "request": {
+                                        "body": { "student": "{resource}" }
+                                    },
                                     "response": {
                                         "status": 400,
                                         "body": null
@@ -127,7 +124,9 @@
                             "cases": [
                                 {
                                     "key": "POSITIVE",
-                                    "request": { "body": "{resource}" },
+                                    "request": {
+                                        "body": { "student": "{resource}" }
+                                    },
                                     "response": {
                                         "status": [200, 201],
                                         "body": {
@@ -142,7 +141,9 @@
 
                                 {
                                     "key": "DESTRUCTIVE",
-                                    "request": { "body": "{resource}" },
+                                    "request": {
+                                        "body": { "student": "{resource}" }
+                                    },
                                     "response": {
                                         "status": 400,
                                         "body": null
@@ -157,31 +158,33 @@
                                     "key": "POSITIVE",
                                     "request": {
                                         "body": {
-                                            "name": {
-                                                "field": "{resource.name}",
-                                                "optional": true
-                                            },
-                                            "addresses": {
-                                                "field": "{resource.addresses}",
-                                                "optional": true
-                                            },
-                                            "age": {
-                                                "field": "{resource.age}",
-                                                "optional": true
-                                            },
-                                            "branches": {
-                                                "field": "{resource.branches}",
-                                                "optional": true
-                                            },
-                                            "classes": {
-                                                "field": "{resource.classes}",
-                                                "optional": true
+                                            "student": {
+                                                "name": {
+                                                    "field": "{resource.name}",
+                                                    "optional": true
+                                                },
+                                                "addresses": {
+                                                    "field": "{resource.addresses}",
+                                                    "optional": true
+                                                },
+                                                "age": {
+                                                    "field": "{resource.age}",
+                                                    "optional": true
+                                                },
+                                                "branch": {
+                                                    "field": "{resource.branch}",
+                                                    "optional": true
+                                                },
+                                                "classes": {
+                                                    "field": "{resource.classes}",
+                                                    "optional": true
+                                                }
                                             }
                                         }
                                     },
                                     "response": {
                                         "status": 200,
-                                        "body": "{resource}"
+                                        "body": { "student": "{resource}" }
                                     }
                                 },
                                 {
@@ -194,7 +197,9 @@
                                 },
                                 {
                                     "key": "DESTRUCTIVE",
-                                    "request": { "body": null },
+                                    "request": {
+                                        "body": { "student": "{resource}" }
+                                    },
                                     "response": {
                                         "status": 400,
                                         "body": null

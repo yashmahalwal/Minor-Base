@@ -50,7 +50,7 @@ export function isValidBody(b: any): b is Body {
 }
 
 export interface Case {
-    key: "POSITIVE" | "NEGATIVE" | "DESCTRUCTIVE";
+    key: "POSITIVE" | "NEGATIVE" | "DESTRUCTIVE";
     request: { body: Body };
     response: { status: number | number[]; body: Body };
 }
@@ -70,8 +70,10 @@ export function isValidCase(o: any): o is Case {
     return true;
 }
 
+export type MethodType = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
 export interface Method {
-    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    method: MethodType;
     cases: Case[];
 }
 export function isValidMethod(m: any): m is Method {

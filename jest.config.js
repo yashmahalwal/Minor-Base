@@ -185,5 +185,6 @@ module.exports = {
 
     // Whether to use watchman for file crawling
     // watchman: true,
-    testRegex: "/tests/.*.test..*"
+    testRegex: "src/.*/.*.test..*",
+    setupFilesAfterEnv: ["./src/tests/generic/utility/jestMatchers.ts"]
 };

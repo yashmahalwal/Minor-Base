@@ -1,4 +1,4 @@
-import { ResourceJSON } from "./../../types/resource";
+import {  FieldBase } from "./../../types/resource";
 import faker from "faker";
 import { BodyBase } from "./../../types/endpoints";
 import {
@@ -10,10 +10,23 @@ import {
     isValidFieldBase,
     isValidBodyRecursion,
     BodyRecursion,
-    Optional
 } from "../../types";
 import _ from "lodash";
-import { generateFieldBaseData, validateInstance } from "../resource";
+import { generateFieldBaseData } from "../resource";
+
+export function populateURLTemplate(
+    urlTemplate: string,
+    instance: Record<string, any>
+) {
+    const urlArr = urlTemplate.split("/");
+    return urlArr
+        .map((urlItem) =>
+            isTemplateString(urlItem)
+                ? getValueFromResource(instance, urlItem)
+                : urlItem
+        )
+        .join("/");
+}
 
 export function getValueFromResource(
     resource: Record<string, any>,
@@ -29,14 +42,12 @@ export function getValueFromResource(
 
 export function bodyBaseFromResource(
     resource: Record<string, any>,
-    template: BodyBase,
-    enableRandomizationOption: boolean
+    template: BodyBase
 ) {
     if (template === null) return null;
     if (isTemplateString(template))
         return getValueFromResource(resource, template);
-    if (isValidFieldBase(template))
-        return generateFieldBaseData(template, enableRandomizationOption);
+    if (isValidFieldBase(template)) return generateFieldBaseData(template);
 }
 
 export function bodyRecursionFromResource(
@@ -64,11 +75,7 @@ export function bodyRecursionFromResource(
         } else f = template[key] as BodyBase | BodyRecursion;
 
         if (isValidBodyBase(f))
-            returnValue[key] = bodyBaseFromResource(
-                resource,
-                f,
-                enableRandomizationOption
-            );
+            returnValue[key] = bodyBaseFromResource(resource, f);
         else if (isValidBodyRecursion(f))
             returnValue[key] = bodyRecursionFromResource(
                 resource,
@@ -85,11 +92,7 @@ export function bodyFromResource(
     enableRandomizationOption: boolean
 ): any {
     if (isValidBodyBase(template))
-        return bodyBaseFromResource(
-            resource,
-            template,
-            enableRandomizationOption
-        );
+        return bodyBaseFromResource(resource, template);
     else if (isValidBodyRecursion(template))
         return bodyRecursionFromResource(
             resource,
@@ -101,35 +104,31 @@ export function bodyFromResource(
 export function resourceToEndpoint(
     resource: Record<string, any>,
     urlTemplate: string,
+    endpoint: string,
     caseEntry: Case
 ) {
     // Step 1, generate URL
-    const urlArr = urlTemplate.split("/");
-    const url = urlArr
-        .map(urlItem =>
-            isTemplateString(urlItem)
-                ? getValueFromResource(resource, urlItem)
-                : urlItem
-        )
-        .join("/");
+    const url = makeURL(resource, urlTemplate, endpoint);
+    const urlBase = populateURLTemplate(urlTemplate, resource);
 
     const reqBodyTemplate = caseEntry.request.body;
     const resBodyTemplate = caseEntry.response.body;
 
     const reqBody = bodyFromResource(resource, reqBodyTemplate, true);
     const resBody = bodyFromResource(resource, resBodyTemplate, false);
-    return { url, reqBody, resBody };
+    return { url, reqBody, resBody, urlBase };
 }
 
 function extractFromBodyBase(template: BodyBase, data: any) {
     const partialRecord: Record<string, any> = {};
     if (isTemplateString(template)) {
         if (template === "{resource}") return data;
-        _.set(
-            partialRecord,
-            template.slice(1, template.length - 1).replace("resource.", ""),
-            data
-        );
+        if (data !== undefined) {
+            const path = template
+                .slice(1, template.length - 1)
+                .replace("resource.", "");
+            _.set(partialRecord, path, data);
+        }
     }
     return partialRecord;
 }
@@ -154,12 +153,12 @@ function extractFromBodyRecursion(
         if (isValidBodyBase(t))
             partialRecord = {
                 ...partialRecord,
-                ...extractFromBodyBase(t, data[key])
+                ...extractFromBodyBase(t, data[key]),
             };
         else if (isValidBodyRecursion(t))
             partialRecord = {
                 ...partialRecord,
-                ...extractFromBodyRecursion(t, data[key])
+                ...extractFromBodyRecursion(t, data[key]),
             };
     }
 
@@ -181,7 +180,7 @@ export function resourceFromCase(
     reqBodyTemplate: Body,
     resBodyTemplate: Body,
     reqBody: Record<string, any>,
-    resBody: Record<string, any>,
+    resBody: Record<string, any>
 ) {
     let resource: Record<string, any> = {};
 
@@ -211,3 +210,83 @@ export function resourceFromCase(
 
     return resource;
 }
+
+export function makeURL(
+    instance: Record<string, any>,
+    urlTemplate: string,
+    endpoint: string
+) {
+    const u = populateURLTemplate(urlTemplate, instance);
+    return `${endpoint}${u}`;
+}
+
+export function compareResponseBodies(
+    resFromServer: any,
+    resExpected: any,
+    resSchema: Case["response"]["body"]
+) {
+    // Traverse the resSchema and validate the fields as needed
+    // Res expected has all nullable and optional fields too. Hence a special function
+
+    if (isValidBodyBase(resSchema)) {
+        if (resSchema === null) {
+            if (resFromServer === null && resExpected === null) return true;
+            if (
+                resFromServer &&
+                typeof resFromServer === "object" &&
+                !Object.keys(resFromServer).length
+            )
+                return true;
+        }
+        if (isTemplateString(resSchema)) {
+            // Use a special validation function
+            // Just remove optional fields from resExpected
+            return _.isEqual(resFromServer, resExpected);
+        }
+        if (isValidFieldBase(resSchema)) {
+            if ((resSchema as FieldBase).nullable && resFromServer === null)
+                return true;
+            if (
+                (resSchema as FieldBase).optional &&
+                resFromServer === undefined
+            )
+                return true;
+        }
+        // Works as values are directly from faker.
+        return _.isEqual(resFromServer, resExpected);
+    }
+    // The resSchema is body recursion
+    if (isValidBodyRecursion(resSchema)) {
+        for (const key in resSchema) {
+            let s = resSchema[key];
+            let resFromServerValue = resFromServer[key];
+            let resExpectedValue = resExpected[key];
+
+            if (s && typeof s === "object" && "field" in s) {
+                // Only optional allowed in  body recursion part
+                if (!s.optional && resFromServerValue === undefined) {
+                    return false;
+                }
+
+                resFromServerValue = resFromServerValue.field;
+                resExpectedValue = resFromServerValue.field;
+                s = s.field;
+            }
+
+            if (
+                !compareResponseBodies(
+                    resFromServerValue,
+                    resExpectedValue,
+                    s as Case["response"]["body"]
+                )
+            )
+                return false;
+        }
+        return true;
+    }
+
+    throw new Error(`${resSchema} is not a valid response schema`);
+}
+
+export * from "./graph";
+export * from "./request";

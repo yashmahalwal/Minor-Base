@@ -12,7 +12,8 @@
         "rootDir": "src",
         "module": "commonjs",
         "target": "ES3",
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "downlevelIteration": true
     },
     "include": ["src"],
     "exclude": ["node_modules"]
