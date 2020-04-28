@@ -4,7 +4,6 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "runBin": "babel-node -x .ts ./src/tests/student/bin",
         "start": "jest --json --outputFile=nirikshak.jest.log.json --expand --passWithNoTests --color=false --noStackTrace"
     },
     "keywords": [],
