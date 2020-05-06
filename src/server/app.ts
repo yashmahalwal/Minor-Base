@@ -10,13 +10,9 @@ app.get("/Student/:id", (req, res) => {
         params: { id },
     } = req;
 
-    if (!id) {
-        res.sendStatus(400);
-        return;
-    }
-
     const student = studentMap.get(id);
     if (student) {
+        // {student: student}
         res.status(200).send({ student });
         return;
     } else {

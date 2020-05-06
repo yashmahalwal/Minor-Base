@@ -5,7 +5,7 @@ export interface Student {
     id: string;
     name?: string;
     age: number;
-    addresses: [number | null];
+    addresses: Array<number| null>;
     branch: { title: string };
     classes: {
         nameNumber: number | string;

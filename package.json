@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "jest --json --outputFile=nirikshak.jest.log.json --expand --passWithNoTests --color=false --noStackTrace"
+        "start": "jest --json --outputFile=nirikshak.jest.log.json --passWithNoTests --color=false --noStackTrace"
     },
     "keywords": [],
     "author": "",
